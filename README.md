@@ -97,6 +97,14 @@ cp .env.example .env
 
 **CRITICAL:** Real credentials must never be committed to GitHub. Edit the `.env` file to include your actual Twilio keys, secret keys, and passwords.
 
+## Default Credentials
+
+For testing and evaluation purposes, you can use the following default credentials to access the admin dashboard:
+
+- **Admin Username:** `stark_admin`
+- **Admin Password:** `stark@123`
+- **Secure Access Key (for resets):** `omega@777`
+
 ## Local Run
 
 To run the application locally for development:
