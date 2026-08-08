@@ -28,3 +28,6 @@ venv.bak/
 # Generated reports
 firewall_report_*
 *.pdf
+
+# Ignore USB Guardian Pro project
+USB Guardian Pro/
