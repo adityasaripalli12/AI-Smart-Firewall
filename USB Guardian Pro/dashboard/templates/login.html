@@ -1,0 +1,282 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Authenticate – USB Guardian Pro</title>
+    
+    <!-- Font Awesome -->
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+    
+    <!-- CSS Styles -->
+    <link rel="stylesheet" href="{{ url_for('static', filename='css/style.css') }}">
+    <link rel="stylesheet" href="{{ url_for('static', filename='css/login.css') }}">
+    <style>
+        @keyframes logoPulse {
+            0%, 100% {
+                transform: scale(1);
+                box-shadow: 0 0 20px rgba(0, 255, 136, 0.35);
+            }
+            50% {
+                transform: scale(1.03);
+                box-shadow: 0 0 35px rgba(0, 255, 136, 0.65);
+            }
+        }
+    </style>
+</head>
+<body style="overflow: hidden;">
+    <!-- Canvas for Cyber HUD Grid Backdrop -->
+    <canvas id="cyber-backdrop"></canvas>
+
+    <div class="auth-layout">
+        <!-- Top Right Clock Widget -->
+        <div class="top-clock-widget glass-panel">
+            <i class="far fa-clock clock-icon-widget"></i>
+            <div class="clock-time-date">
+                <div id="top-time">10:24:35 AM</div>
+                <div id="top-date">May 27, 2026</div>
+            </div>
+        </div>
+
+        <!-- Main Content Area -->
+        <div class="auth-main-grid">
+            <!-- Left Side: Brand Identity & Endpoint Status -->
+            <div class="brand-side">
+                <div class="cyber-shield-container" style="width: 180px; height: 180px; margin-bottom: 10px;">
+                    <img src="{{ url_for('static', filename='images/logo.jpg') }}" alt="USB Guardian Pro Logo" 
+                         style="width: 100%; height: 100%; object-fit: cover; border-radius: 50%; border: 2.5px solid var(--primary-color); box-shadow: 0 0 25px rgba(0, 255, 136, 0.4); animation: logoPulse 4s infinite ease-in-out;">
+                </div>
+                
+                <div class="brand-text-section">
+                    <h1 class="brand-title">USB <span class="guardian-green">GUARDIAN</span> <span class="pro-tag">PRO</span></h1>
+                    <p class="brand-suite">ENTERPRISE USB SECURITY SUITE</p>
+                    <p class="brand-slogan">Protect. Monitor. <span class="guardian-green">Secure.</span></p>
+                    <p class="brand-description">
+                        Advanced protection against unauthorized USB access, sensitive file theft, malware threats and insider risks.
+                    </p>
+                </div>
+                
+                <!-- Status Indicators List -->
+                <div class="cyber-status-indicators">
+                    <div class="status-indicator-item">
+                        <span class="status-label"><i class="fas fa-circle-check status-icon-green"></i> Protection Engine</span>
+                        <span class="status-value text-green">ONLINE</span>
+                    </div>
+                    <div class="status-indicator-item">
+                        <span class="status-label"><i class="fas fa-usb status-icon-green"></i> USB Monitoring</span>
+                        <span class="status-value text-green">ACTIVE</span>
+                    </div>
+                    <div class="status-indicator-item">
+                        <span class="status-label"><i class="fas fa-database status-icon-green"></i> Database Connection</span>
+                        <span class="status-value text-green">CONNECTED</span>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Right Side: Login Card Form -->
+            <div class="form-side">
+                <div class="login-card glass-panel">
+                    <div class="form-lock-icon">
+                        <i class="fas fa-lock"></i>
+                    </div>
+                    <h2 class="form-title" id="form-role-header">Employee Login</h2>
+                    <p class="form-subtitle">Access your secure dashboard</p>
+                    
+                    <!-- Flash Message Alerts -->
+                    <div class="auth-alerts">
+                        {% with messages = get_flashed_messages(with_categories=true) %}
+                            {% if messages %}
+                                {% for category, message in messages %}
+                                    <div class="alert alert-{{ category }}">
+                                        <i class="fas fa-exclamation-circle"></i> {{ message }}
+                                    </div>
+                                {% endfor %}
+                            {% endif %}
+                        {% endwith %}
+                    </div>
+                    
+                    <form action="{{ url_for('auth.login') }}" method="POST">
+                        <div class="input-container">
+                            <i class="fas fa-user input-icon"></i>
+                            <input type="text" id="username" name="username" class="login-input" placeholder="Employee ID or Username" required autocomplete="off">
+                        </div>
+
+                        <div class="input-container">
+                            <i class="fas fa-lock input-icon"></i>
+                            <input type="password" id="password" name="password" class="login-input" placeholder="Password" required>
+                            <i class="fas fa-eye password-toggle-btn" id="pass-toggle" onclick="togglePasswordVisibility()"></i>
+                        </div>
+
+                        <div class="form-options">
+                            <label class="remember-me">
+                                <input type="checkbox" name="remember" style="accent-color: var(--primary-color);">
+                                <span>Remember Me</span>
+                            </label>
+                            <a href="#" class="forgot-pass" onclick="alert('Contact security administrator to reset credential tokens.')">Forgot Password?</a>
+                        </div>
+
+                        <button type="submit" class="submit-login-btn">
+                            <i class="fas fa-arrow-right-to-bracket"></i> LOGIN
+                        </button>
+                    </form>
+
+                    <div class="divider">
+                        <span>OR</span>
+                    </div>
+
+                    <!-- Registration Route -->
+                    <a href="{{ url_for('auth.register') }}" class="register-link-btn">
+                        <i class="fas fa-user-plus"></i> Register New Employee
+                    </a>
+
+                    <!-- SQLite System Status Bar inside the card -->
+                    <div class="card-status-bar">
+                        <i class="fas fa-circle-check status-bar-icon"></i>
+                        <div class="status-bar-text">
+                            <div class="status-bar-title">System Status</div>
+                            <div class="status-bar-desc">All systems operational</div>
+                        </div>
+                        <span class="status-bar-dot"></span>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <!-- Footer -->
+        <footer class="auth-footer">
+            <div class="footer-item">
+                <i class="fas fa-circle-check footer-icon"></i> USB Guardian Pro © 2026
+            </div>
+            <div class="footer-item">
+                <i class="fas fa-lock footer-icon"></i> Securing Every Connection. Protecting Every Data.
+            </div>
+        </footer>
+    </div>
+
+    <!-- Sync Clock and Grid Backdrop Scripts -->
+    <script src="{{ url_for('static', filename='js/notifications.js') }}"></script>
+    <script>
+        // Sync Top Clock Widget with Local time
+        function syncTopClock() {
+            const timeEl = document.getElementById('top-time');
+            const dateEl = document.getElementById('top-date');
+            
+            const update = () => {
+                const now = new Date();
+                
+                // Format Time: 10:24:35 AM
+                let hrs = now.getHours();
+                const mins = String(now.getMinutes()).padStart(2, '0');
+                const secs = String(now.getSeconds()).padStart(2, '0');
+                const ampm = hrs >= 12 ? 'PM' : 'AM';
+                hrs = hrs % 12;
+                hrs = hrs ? hrs : 12; // 0 should be 12
+                const hrsStr = String(hrs).padStart(2, '0');
+                
+                timeEl.textContent = `${hrsStr}:${mins}:${secs} ${ampm}`;
+                
+                // Format Date: May 27, 2026
+                const months = ['Jan', 'Feb', 'Mar', 'Apr', 'May', 'Jun', 'Jul', 'Aug', 'Sep', 'Oct', 'Nov', 'Dec'];
+                const month = months[now.getMonth()];
+                const day = now.getDate();
+                const year = now.getFullYear();
+                
+                dateEl.textContent = `${month} ${day}, ${year}`;
+            };
+            
+            update();
+            setInterval(update, 1000);
+        }
+
+        // Toggle Password visibility
+        function togglePasswordVisibility() {
+            const passwordField = document.getElementById('password');
+            const toggleIcon = document.getElementById('pass-toggle');
+            
+            if (passwordField.type === 'password') {
+                passwordField.type = 'text';
+                toggleIcon.className = 'fas fa-eye-slash password-toggle-btn';
+            } else {
+                passwordField.type = 'password';
+                toggleIcon.className = 'fas fa-eye password-toggle-btn';
+            }
+        }
+
+        // Cyber Grid and Rotating Radar HUD Backdrop
+        const canvas = document.getElementById('cyber-backdrop');
+        const ctx = canvas.getContext('2d');
+
+        canvas.width = window.innerWidth;
+        canvas.height = window.innerHeight;
+
+        window.addEventListener('resize', () => {
+            canvas.width = window.innerWidth;
+            canvas.height = window.innerHeight;
+        });
+
+        let angle = 0;
+        const drawBackdrop = () => {
+            ctx.fillStyle = '#060b12';
+            ctx.fillRect(0, 0, canvas.width, canvas.height);
+
+            // Draw Background Grid
+            ctx.strokeStyle = 'rgba(0, 255, 136, 0.02)';
+            ctx.lineWidth = 1;
+            const gridSize = 45;
+            for (let x = 0; x < canvas.width; x += gridSize) {
+                ctx.beginPath();
+                ctx.moveTo(x, 0);
+                ctx.lineTo(x, canvas.height);
+                ctx.stroke();
+            }
+            for (let y = 0; y < canvas.height; y += gridSize) {
+                ctx.beginPath();
+                ctx.moveTo(0, y);
+                ctx.lineTo(canvas.width, y);
+                ctx.stroke();
+            }
+
+            // Draw Rotating Circular HUD behind shield (approx left center)
+            const centerX = canvas.width * 0.25;
+            const centerY = canvas.height * 0.35;
+
+            ctx.save();
+            ctx.translate(centerX, centerY);
+            ctx.rotate(angle);
+
+            // Radar Ring 1
+            ctx.strokeStyle = 'rgba(0, 255, 136, 0.04)';
+            ctx.lineWidth = 2;
+            ctx.beginPath();
+            ctx.arc(0, 0, 160, 0, Math.PI * 1.5);
+            ctx.stroke();
+
+            // Radar Ring 2 (dashed)
+            ctx.strokeStyle = 'rgba(0, 255, 136, 0.02)';
+            ctx.setLineDash([5, 15]);
+            ctx.beginPath();
+            ctx.arc(0, 0, 240, 0, Math.PI * 2);
+            ctx.stroke();
+            ctx.setLineDash([]);
+
+            // Radar Crosshairs
+            ctx.strokeStyle = 'rgba(0, 255, 136, 0.015)';
+            ctx.beginPath();
+            ctx.moveTo(-300, 0);
+            ctx.lineTo(300, 0);
+            ctx.moveTo(0, -300);
+            ctx.lineTo(0, 300);
+            ctx.stroke();
+
+            ctx.restore();
+
+            // Slow rotation speed
+            angle += 0.0015;
+            requestAnimationFrame(drawBackdrop);
+        };
+
+        drawBackdrop();
+        syncTopClock();
+    </script>
+</body>
+</html>

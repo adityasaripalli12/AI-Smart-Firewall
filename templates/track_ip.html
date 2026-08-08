@@ -1,0 +1,198 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Threat Intel - {{ info.ip }}</title>
+    <link href="https://fonts.googleapis.com/css2?family=Outfit:wght@300;400;500;600;700;900&display=swap" rel="stylesheet">
+    <style>
+        :root {
+            --primary: #ff3c3c;
+            --primary-glow: rgba(255, 60, 60, 0.3);
+            --stark-gold: #ffcc00;
+            --bg-dark: #050914;
+            --bg-card: rgba(15, 23, 42, 0.85);
+            --border: rgba(255, 204, 0, 0.2);
+            --text-main: #e2e8f0;
+            --text-dim: #94a3b8;
+        }
+
+        * { box-sizing: border-box; margin: 0; padding: 0; font-family: 'Outfit', sans-serif; }
+
+        body {
+            background-color: var(--bg-dark);
+            color: var(--text-main);
+            min-height: 100vh;
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            padding: 40px;
+            background-image: radial-gradient(circle at center, rgba(0, 242, 255, 0.05) 0%, transparent 70%);
+        }
+
+        .intel-container {
+            width: 100%;
+            max-width: 900px;
+            background: var(--bg-card);
+            backdrop-filter: blur(20px);
+            border: 1px solid var(--border);
+            border-radius: 32px;
+            overflow: hidden;
+            box-shadow: 0 40px 100px rgba(0, 0, 0, 0.5);
+            animation: slideUp 0.6s cubic-bezier(0.16, 1, 0.3, 1);
+        }
+
+        @keyframes slideUp {
+            from { transform: translateY(30px); opacity: 0; }
+            to { transform: translateY(0); opacity: 1; }
+        }
+
+        .intel-header {
+            padding: 40px;
+            border-bottom: 1px solid var(--border);
+            background: linear-gradient(to right, rgba(0, 242, 255, 0.05), transparent);
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+        }
+
+        .intel-header h2 {
+            font-size: 2rem;
+            font-weight: 900;
+            letter-spacing: -1px;
+            background: linear-gradient(to right, #fff, var(--primary));
+            -webkit-background-clip: text;
+            -webkit-text-fill-color: transparent;
+            text-transform: uppercase;
+        }
+
+        .intel-body { padding: 40px; }
+
+        .intel-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(200px, 1fr));
+            gap: 20px;
+            margin-bottom: 40px;
+        }
+
+        .intel-item {
+            background: rgba(255, 255, 255, 0.03);
+            padding: 24px;
+            border-radius: 20px;
+            border: 1px solid rgba(255, 255, 255, 0.05);
+            transition: all 0.3s ease;
+        }
+
+        .intel-item:hover {
+            border-color: var(--primary);
+            background: rgba(0, 242, 255, 0.05);
+        }
+
+        .intel-item label {
+            display: block;
+            font-size: 0.75rem;
+            font-weight: 700;
+            color: var(--text-dim);
+            text-transform: uppercase;
+            letter-spacing: 2px;
+            margin-bottom: 10px;
+        }
+
+        .intel-item span {
+            font-size: 1.25rem;
+            font-weight: 600;
+            color: #fff;
+        }
+
+        .map-section {
+            border-radius: 24px;
+            overflow: hidden;
+            border: 1px solid var(--border);
+            height: 450px;
+            position: relative;
+            box-shadow: inset 0 0 20px rgba(0,0,0,0.5);
+        }
+
+        iframe { 
+            width: 100%; 
+            height: 100%; 
+            border: none; 
+        }
+
+        .btn-back {
+            display: inline-flex;
+            align-items: center;
+            gap: 12px;
+            padding: 12px 28px;
+            background: var(--bg-card);
+            border: 1px solid var(--border);
+            color: #fff;
+            text-decoration: none;
+            border-radius: 14px;
+            font-weight: 700;
+            font-size: 0.9rem;
+            transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
+            text-transform: uppercase;
+            letter-spacing: 1px;
+        }
+
+        .btn-back:hover {
+            border-color: var(--primary);
+            background: var(--primary-glow);
+            box-shadow: 0 0 20px var(--primary-glow);
+            transform: translateX(-5px);
+        }
+
+        .footer-note {
+            text-align: center;
+            color: var(--text-dim);
+            margin-top: 35px;
+            font-size: 0.8rem;
+            font-weight: 500;
+            letter-spacing: 2px;
+            text-transform: uppercase;
+        }
+    </style>
+</head>
+<body>
+
+    <div class="intel-container">
+        <header class="intel-header">
+            <div>
+                <p style="color: var(--primary); font-weight: 800; font-size: 0.8rem; letter-spacing: 3px; text-transform: uppercase; margin-bottom: 6px;">STARK_OS INTEL PROFILE</p>
+                <h2>TARGET SOURCE: {{ info.ip }}</h2>
+            </div>
+            <a href="/" class="btn-back">
+                <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"><line x1="19" y1="12" x2="5" y2="12"></line><polyline points="12 19 5 12 12 5"></polyline></svg>
+                BACK
+            </a>
+        </header>
+
+        <div class="intel-body">
+            <div class="intel-grid">
+                <div class="intel-item">
+                    <label>Geo Location</label>
+                    <span>{{ info.city }}, {{ info.country }}</span>
+                </div>
+                <div class="intel-item">
+                    <label>Service Provider</label>
+                    <span>{{ info.isp }}</span>
+                </div>
+                <div class="intel-item">
+                    <label>GPS Coordinates</label>
+                    <span>{{ info.lat }}°, {{ info.lon }}°</span>
+                </div>
+            </div>
+
+            <div class="map-section">
+                <iframe src="https://maps.google.com/maps?q={{ info.lat }},{{ info.lon }}&output=embed"></iframe>
+            </div>
+            
+            <p class="footer-note">
+                S.H.I.E.L.D. HELICARRIER CORE // STARK_OS CLASSIFIED INTEL
+            </p>
+        </div>
+    </div>
+
+</body>
+</html>

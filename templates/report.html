@@ -1,0 +1,25 @@
+import datetime
+
+def generate_detailed_report(logs):
+    total = len(logs)
+    attacks = sum(1 for log in logs if "ATTACK" in log["status"])
+    normal = total - attacks
+
+    report_logs = []
+
+    for log in logs:
+        report_logs.append({
+            "status": log.get("status", "-"),
+            "type": log.get("type", "-"),
+            "ip": log.get("ip", "-"),
+            "honeypot": log.get("honeypot", "-"),
+            "time": datetime.datetime.now().strftime("%H:%M:%S"),
+            "action": "Blocked IP & Activated Backup" if "ATTACK" in log["status"] else "Allowed"
+        })
+
+    return {
+        "count": total,
+        "attacks": attacks,
+        "normal": normal,
+        "logs": report_logs
+    }

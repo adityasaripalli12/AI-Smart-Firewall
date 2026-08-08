@@ -1,0 +1,7 @@
+Flask
+Werkzeug
+requests
+openpyxl
+reportlab
+Pillow
+opencv-python

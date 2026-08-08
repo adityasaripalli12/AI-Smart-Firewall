@@ -1,0 +1,178 @@
+{% extends 'base.html' %}
+
+{% block title %}Endpoint Panel – USB Guardian Pro{% endblock %}
+{% block page_header %}ENDPOINT SECURITY COMMAND{% endblock %}
+{% block page_subheader %}PERSONAL WORKSTATION AND DRIVE PORT MANAGEMENT{% endblock %}
+
+{% block content %}
+<span id="employee-dashboard-indicator" style="display: none;"></span>
+
+<div class="stats-grid">
+    <!-- Stat Item 1: Personal Risk Score -->
+    <div class="glass-panel stats-card">
+        <div class="stats-info">
+            <h3>Personal Risk Index</h3>
+            <div class="stats-number" data-target="{{ employee.risk_score }}">0</div>
+        </div>
+        <div class="stats-icon">
+            {% if employee.risk_score >= 70 %}
+                <i class="fas fa-biohazard text-danger"></i>
+            {% elif employee.risk_score >= 40 %}
+                <i class="fas fa-triangle-exclamation text-warning"></i>
+            {% else %}
+                <i class="fas fa-shield-check text-primary"></i>
+            {% endif %}
+        </div>
+    </div>
+
+    <!-- Stat Item 2: Whitelisted USBs -->
+    <div class="glass-panel stats-card">
+        <div class="stats-info">
+            <h3>Whitelisted Devices</h3>
+            <div class="stats-number" data-target="{{ devices | selectattr('status', 'equalto', 'allowed') | list | length }}">0</div>
+        </div>
+        <div class="stats-icon">
+            <i class="fas fa-usb"></i>
+        </div>
+    </div>
+
+    <!-- Stat Item 3: Pending Approvals -->
+    <div class="glass-panel stats-card">
+        <div class="stats-info">
+            <h3>Pending Requests</h3>
+            <div class="stats-number" data-target="{{ devices | selectattr('status', 'equalto', 'pending') | list | length }}">0</div>
+        </div>
+        <div class="stats-icon">
+            <i class="fas fa-hourglass-half"></i>
+        </div>
+    </div>
+
+    <!-- Stat Item 4: Account Status -->
+    <div class="glass-panel stats-card">
+        <div class="stats-info">
+            <h3>Account Status</h3>
+            <div class="stats-number" style="font-size: 1.2rem; font-weight: 700; color: {% if employee.status == 'active' %}var(--primary-color){% else %}var(--danger-color){% endif %}; text-transform: uppercase;">
+                {{ employee.status }}
+            </div>
+        </div>
+        <div class="stats-icon">
+            <i class="fas fa-circle-user"></i>
+        </div>
+    </div>
+</div>
+
+<div class="dashboard-split">
+    <!-- Left Column: Whitelist Request Form -->
+    <div class="glass-panel widget-panel">
+        <h2 class="widget-title">
+            <i class="fas fa-file-signature text-secondary"></i> Request Whitelist Approval
+        </h2>
+        
+        <form action="{{ url_for('routes.dashboard') }}" method="POST">
+            <div class="cyber-form-group">
+                <label class="cyber-form-label" for="serial_number">USB Serial Number</label>
+                <input type="text" id="serial_number" name="serial_number" class="cyber-input" placeholder="e.g. SanDisk-88B97" required autocomplete="off">
+            </div>
+            
+            <div class="cyber-form-group">
+                <label class="cyber-form-label" for="device_name">Device Label / Description</label>
+                <input type="text" id="device_name" name="device_name" class="cyber-input" placeholder="e.g. SanDisk 64GB Cruzer" required autocomplete="off">
+            </div>
+            
+            <div style="display: grid; grid-template-columns: 1fr 1fr; gap: 15px;">
+                <div class="cyber-form-group">
+                    <label class="cyber-form-label" for="vendor_id">Vendor ID (VID) [Optional]</label>
+                    <input type="text" id="vendor_id" name="vendor_id" class="cyber-input" placeholder="e.g. 0781" autocomplete="off">
+                </div>
+                <div class="cyber-form-group">
+                    <label class="cyber-form-label" for="product_id">Product ID (PID) [Optional]</label>
+                    <input type="text" id="product_id" name="product_id" class="cyber-input" placeholder="e.g. 5581" autocomplete="off">
+                </div>
+            </div>
+            
+            <div class="cyber-form-group">
+                <label class="cyber-form-label" for="reason">Business Justification / Reason</label>
+                <textarea id="reason" name="reason" class="cyber-input" rows="3" placeholder="Explain the business necessity of plugging this device into company endpoints..." required style="resize: none;"></textarea>
+            </div>
+            
+            <button type="submit" class="cyber-btn btn-primary" style="width: 100%; justify-content: center;">
+                <i class="fas fa-paper-plane"></i> Submit Request
+            </button>
+        </form>
+    </div>
+
+    <!-- Right Column: Registered Devices Overview -->
+    <div class="glass-panel widget-panel">
+        <h2 class="widget-title">
+            <i class="fas fa-list text-primary"></i> Registered USB Drives
+        </h2>
+        
+        <div style="max-height: 380px; overflow-y: auto; padding-right: 5px;">
+            {% if devices %}
+                {% for dev in devices %}
+                    <div style="background: rgba(6, 11, 18, 0.4); border: 1px solid rgba(255,255,255,0.03); border-radius: 8px; padding: 15px; margin-bottom: 12px; display: flex; justify-content: space-between; align-items: center; gap: 10px;">
+                        <div>
+                            <div style="font-weight: 600; font-size: 0.9rem; color: white;">{{ dev.device_name }}</div>
+                            <div style="font-family: var(--font-mono); font-size: 0.7rem; color: var(--text-muted); margin-top: 3px;">
+                                S/N: {{ dev.serial_number }}
+                            </div>
+                            <div style="font-size: 0.75rem; color: var(--text-muted); margin-top: 5px;">
+                                Last seen: <span style="font-family: var(--font-mono);">{{ dev.last_seen or 'Never' }}</span>
+                            </div>
+                        </div>
+                        <div>
+                            <span class="badge badge-{{ dev.status }}">{{ dev.status }}</span>
+                        </div>
+                    </div>
+                {% endfor %}
+            {% else %}
+                <div style="font-size: 0.8rem; color: var(--text-muted); text-align: center; padding: 40px 0;">
+                    <i class="fas fa-usb" style="font-size: 2rem; margin-bottom: 10px; opacity: 0.3;"></i>
+                    <div>No devices registered to your account yet.</div>
+                </div>
+            {% endif %}
+        </div>
+    </div>
+</div>
+
+<!-- Bottom Section: Local Workstation Logs -->
+<div class="glass-panel widget-panel" style="margin-bottom: 20px;">
+    <h2 class="widget-title">
+        <i class="fas fa-terminal text-warning"></i> Recent Security Logs
+    </h2>
+    <div class="table-responsive">
+        <table class="cyber-table">
+            <thead>
+                <tr>
+                    <th>Timestamp</th>
+                    <th>Security Action</th>
+                    <th>Details</th>
+                    <th>Severity</th>
+                </tr>
+            </thead>
+            <tbody>
+                {% if logs %}
+                    {% for log in logs %}
+                        <tr>
+                            <td style="font-family: var(--font-mono);">{{ log.timestamp }}</td>
+                            <td style="font-family: var(--font-mono); color: var(--secondary-color);">{{ log.action }}</td>
+                            <td>{{ log.details }}</td>
+                            <td>
+                                <span class="badge badge-{{ 'blocked' if log.severity == 'critical' else ('pending' if log.severity == 'warning' else 'allowed') }}">
+                                    {{ log.severity }}
+                                </span>
+                            </td>
+                        </tr>
+                    {% endfor %}
+                {% else %}
+                    <tr>
+                        <td colspan="4" style="text-align: center; color: var(--text-muted); padding: 20px 0;">
+                            No connection events recorded.
+                        </td>
+                    </tr>
+                {% endif %}
+            </tbody>
+        </table>
+    </div>
+</div>
+{% endblock %}

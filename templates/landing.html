@@ -1,0 +1,496 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>STARK INDUSTRIES - DEFENSE PROTOCOL</title>
+    <link href="https://fonts.googleapis.com/css2?family=Outfit:wght@300;500;700;900&display=swap" rel="stylesheet">
+    <style>
+        :root {
+            --primary: #ff3c3c;
+            --primary-dark: #880000;
+            --stark-gold: #ffcc00;
+            --bg-color: #050914;
+            --bg-accent: #0a0f1e;
+        }
+
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+            font-family: 'Outfit', sans-serif;
+        }
+
+        body {
+            background-color: var(--bg-color);
+            background-image: 
+                linear-gradient(rgba(5, 9, 20, 0.75), rgba(5, 9, 20, 0.75)),
+                url('https://images.alphacoders.com/100/1001859.jpg');
+            background-size: cover;
+            background-position: center;
+            color: #fff;
+            height: 100vh;
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            overflow: hidden;
+            position: relative;
+        }
+
+        /* Ambient HUD Layer */
+        .smoke-overlay {
+            position: absolute;
+            inset: 0;
+            background: radial-gradient(circle at 50% 50%, rgba(255, 60, 60, 0.1), transparent 70%);
+            opacity: 0.3;
+            pointer-events: none;
+            z-index: 1;
+        }
+
+        /* Hexagonal Grid Background */
+        .hex-grid {
+            position: fixed;
+            inset: 0;
+            background-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='28' height='49' viewBox='0 0 28 49'%3E%3Cpath fill-rule='evenodd' d='M13.99 9.25l13 7.5v15l-13 7.5L1 31.75v-15l12.99-7.5zM3 17.9L14 11.55l11 6.35v12.7l-11 6.35-11-6.35V17.9z' fill='%23ff3c3c' fill-opacity='0.05'/%3E%3C/svg%3E");
+            opacity: 0.3;
+            z-index: 2;
+            pointer-events: none;
+        }
+
+        #meshCanvas, #constellationCanvas {
+            position: fixed;
+            inset: 0;
+            pointer-events: none;
+            z-index: 3;
+        }
+
+        #meshCanvas { opacity: 0.3; }
+        #constellationCanvas { opacity: 0.4; }
+
+        .content {
+            position: relative;
+            z-index: 2000;
+            text-align: center;
+            padding: 5rem 3rem;
+            border-radius: 30px;
+            background: rgba(10, 15, 30, 0.6);
+            backdrop-filter: blur(40px);
+            -webkit-backdrop-filter: blur(40px);
+            border: 1px solid rgba(255, 60, 60, 0.2);
+            box-shadow: 
+                0 40px 100px -20px rgba(0, 0, 0, 0.8),
+                0 0 50px rgba(255, 60, 60, 0.05);
+            max-width: 900px;
+            width: 90%;
+            transform: translateY(30px);
+            opacity: 0;
+            animation: fadeInScale 1.5s cubic-bezier(0.16, 1, 0.3, 1) forwards;
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+        }
+
+        @keyframes fadeInScale {
+            to { transform: translateY(0); opacity: 1; }
+        }
+
+        .subtitle {
+            font-size: 0.9rem;
+            text-transform: uppercase;
+            letter-spacing: 8px;
+            color: var(--stark-gold);
+            margin-bottom: 2rem;
+            font-weight: 600;
+            text-shadow: 0 0 10px rgba(255, 204, 0, 0.3);
+        }
+
+        .title {
+            font-size: 3.5rem;
+            font-weight: 900;
+            line-height: 1.1;
+            margin-bottom: 3.5rem;
+            background: linear-gradient(to right, #fff, #ff3c3c, #ffcc00, #fff);
+            background-size: 300% auto;
+            -webkit-background-clip: text;
+            -webkit-text-fill-color: transparent;
+            text-shadow: 0 0 50px rgba(255, 60, 60, 0.2);
+            animation: shine 8s linear infinite;
+            text-transform: uppercase;
+        }
+
+        @keyframes shine {
+            to { background-position: 300% center; }
+        }
+
+        .explore-btn {
+            display: inline-flex;
+            align-items: center;
+            justify-content: center;
+            gap: 15px;
+            padding: 1.5rem 5rem;
+            font-size: 1.2rem;
+            font-weight: 800;
+            color: #fff;
+            text-decoration: none;
+            background: rgba(255, 60, 60, 0.05);
+            border: 2px solid rgba(255, 60, 60, 0.3);
+            border-radius: 60px;
+            cursor: pointer;
+            transition: all 0.6s cubic-bezier(0.16, 1, 0.3, 1);
+            position: relative;
+            overflow: hidden;
+            letter-spacing: 2px;
+            text-transform: uppercase;
+        }
+
+        button {
+            position: relative;
+            overflow: hidden;
+            transition: all 0.3s cubic-bezier(0.175, 0.885, 0.32, 1.275);
+            cursor: pointer;
+        }
+
+        button:active {
+            transform: scale(0.9) translateY(2px);
+            filter: brightness(1.5);
+        }
+
+        button::after {
+            content: '';
+            position: absolute;
+            top: 50%;
+            left: 50%;
+            width: 0;
+            height: 0;
+            background: radial-gradient(circle, var(--stark-gold) 0%, transparent 60%);
+            transform: translate(-50%, -50%);
+            opacity: 0;
+            transition: width 0.5s, height 0.5s, opacity 0.5s;
+            pointer-events: none;
+        }
+
+        button:active::after {
+            width: 400px;
+            height: 400px;
+            opacity: 0.4;
+            transition: 0s;
+        }
+
+        .explore-btn:hover {
+            transform: translateY(-8px) scale(1.05);
+            background: rgba(255, 60, 60, 0.15);
+            border-color: #ffcc00;
+            box-shadow: 0 0 30px rgba(255, 204, 0, 0.4);
+            color: #ffcc00;
+        }
+
+        .branding {
+            margin-top: 3.5rem;
+            font-size: 0.8rem;
+            color: rgba(255, 204, 0, 0.4);
+            letter-spacing: 4px;
+            text-transform: uppercase;
+        }
+
+        /* Transition HUD */
+        .transition-overlay {
+            position: fixed;
+            inset: 0;
+            background: #000;
+            z-index: 3000;
+            display: flex;
+            flex-direction: column;
+            justify-content: center;
+            align-items: center;
+            opacity: 0;
+            pointer-events: none;
+            transition: opacity 0.5s ease;
+        }
+
+        .transition-overlay.active {
+            opacity: 1;
+            pointer-events: all;
+        }
+
+        #matrixCanvas {
+            position: absolute;
+            inset: 0;
+            z-index: 3100;
+            opacity: 0;
+            transition: opacity 1s ease;
+            pointer-events: none;
+        }
+
+        .access-hub {
+            position: relative;
+            z-index: 3200;
+            text-align: center;
+            display: none;
+            opacity: 0;
+            transition: opacity 0.5s ease;
+        }
+
+        .access-bar-container {
+            width: 400px;
+            height: 4px;
+            background: rgba(136, 0, 0, 0.1);
+            border: 1px solid rgba(255, 60, 60, 0.3);
+            border-radius: 2px;
+            margin: 30px auto 0;
+            overflow: hidden;
+        }
+
+        .access-bar-fill {
+            height: 100%;
+            width: 0%;
+            background: #ff3c3c;
+            box-shadow: 0 0 15px #ff3c3c;
+            transition: width 0.1s linear;
+        }
+
+        .access-title {
+            font-family: monospace;
+            font-size: 1rem;
+            color: #ffcc00;
+            letter-spacing: 5px;
+            text-shadow: 0 0 10px #ff3c3c;
+        }
+
+        .hud-brackets {
+            position: relative;
+            display: inline-block;
+            padding: 10px 40px;
+            border-left: 2px solid #ffcc00;
+            border-right: 2px solid #ffcc00;
+            margin-bottom: 20px;
+        }
+
+        .hud-brackets::before, .hud-brackets::after {
+            content: '';
+            position: absolute;
+            width: 20px;
+            height: 2px;
+            background: #ffcc00;
+        }
+
+        .hud-brackets::before { top: 0; left: 0; }
+        .hud-brackets::after { bottom: 0; right: 0; }
+
+        .scanline-overlay {
+            position: absolute;
+            inset: 0;
+            background: linear-gradient(to bottom, transparent 50%, rgba(255, 60, 60, 0.1) 50%);
+            background-size: 100% 4px;
+            pointer-events: none;
+        }
+    </style>
+</head>
+<body>
+
+    <div class="hex-grid"></div>
+    <div class="smoke-overlay"></div>
+    <canvas id="meshCanvas"></canvas>
+    <canvas id="constellationCanvas"></canvas>
+
+    <div class="transition-overlay" id="transitionOverlay">
+        <canvas id="matrixCanvas"></canvas>
+        <div class="access-hub" id="accessHub">
+            <div style="position: relative; margin-bottom: 30px;">
+                <div class="scanline-overlay" id="logoScanline" style="display: none;"></div>
+                <img src="/static/images/avengers_logo.png" id="hawkLogo" style="width: 220px; opacity: 0; transform: scale(0.5); filter: drop-shadow(0 0 20px #ff3c3c); transition: all 1.5s cubic-bezier(0.19, 1, 0.22, 1);">
+            </div>
+            
+            <div class="hud-brackets" id="welcomeContainer" style="display: none; opacity: 0; transition: opacity 0.8s ease;">
+                <div class="access-title" style="color: #ffcc00; letter-spacing: 12px; font-weight: 900; text-shadow: 0 0 20px #ff3c3c; margin-bottom: 10px;">AVENGERS ASSEMBLE</div>
+                <div style="color: rgba(255, 204, 0, 0.7); letter-spacing: 4px; font-weight: 500; font-family: monospace; font-size: 0.8rem; text-transform: uppercase;">IDENTITY RECOGNIZED: STARK_VERIFIED</div>
+            </div>
+
+            <div class="access-title" id="accessTitle">SYNCHRONIZING_STARK_OS</div>
+            
+            <div class="access-bar-container">
+                <div class="access-bar-fill" id="accessBar"></div>
+            </div>
+            <div style="margin-top: 15px; font-family: monospace; font-size: 0.7rem; color: #ff3c3c; opacity: 0.8;" id="accessStatus">INITIATING_JARVIS_LINK...</div>
+        </div>
+    </div>
+
+    <div class="content">
+        <div class="subtitle">S.H.I.E.L.D. HELICARRIER CORE // STARK_OS AUTHORIZED</div>
+        <h1 class="title">AVENGERS<br>DEFENSE HUB</h1>
+        
+        <a href="javascript:void(0)" class="explore-btn" onclick="startTransition()">
+            INITIATE_HANDSHAKE
+            <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+                <line x1="5" y1="12" x2="19" y2="12"></line>
+                <polyline points="12 5 19 12 12 19"></polyline>
+            </svg>
+        </a>
+
+        <div class="branding">[ STARK INDUSTRIES // AUTH_STRATA: OMEGA ]</div>
+    </div>
+
+    <script>
+        const canvas = document.getElementById('meshCanvas');
+        const ctx = canvas.getContext('2d');
+        const constellationCanvas = document.getElementById('constellationCanvas');
+        const cCtx = constellationCanvas.getContext('2d');
+        let particles = [], constellationParticles = [], mouse = { x: null, y: null, radius: 200 };
+
+        window.addEventListener('mousemove', (e) => { mouse.x = e.x; mouse.y = e.y; });
+        window.addEventListener('resize', () => { init(); initConstellation(); initMatrix(); });
+
+        function initConstellation() {
+            constellationCanvas.width = window.innerWidth;
+            constellationCanvas.height = window.innerHeight;
+            constellationParticles = [];
+            for (let i = 0; i < 40; i++) {
+                constellationParticles.push({
+                    x: Math.random() * constellationCanvas.width,
+                    y: Math.random() * constellationCanvas.height,
+                    vx: (Math.random() - 0.5) * 1.5, vy: (Math.random() - 0.5) * 1.5, size: 2
+                });
+            }
+        }
+
+        function animateConstellation() {
+            cCtx.clearRect(0, 0, constellationCanvas.width, constellationCanvas.height);
+            constellationParticles.forEach((p, i) => {
+                p.x += p.vx; p.y += p.vy;
+                if (p.x < 0 || p.x > constellationCanvas.width) p.vx *= -1;
+                if (p.y < 0 || p.y > constellationCanvas.height) p.vy *= -1;
+                let dx = mouse.x - p.x, dy = mouse.y - p.y;
+                let dist = Math.sqrt(dx*dx + dy*dy);
+                if (dist < 300) { p.x += dx * 0.02; p.y += dy * 0.02; }
+                cCtx.fillStyle = 'rgba(0, 255, 255, 0.4)';
+                cCtx.beginPath(); cCtx.arc(p.x, p.y, p.size, 0, Math.PI * 2); cCtx.fill();
+                for (let j = i + 1; j < constellationParticles.length; j++) {
+                    const p2 = constellationParticles[j];
+                    let dx2 = p.x - p2.x, dy2 = p.y - p2.y;
+                    let dist2 = Math.sqrt(dx2*dx2 + dy2*dy2);
+                    if (dist2 < 120) {
+                        cCtx.strokeStyle = `rgba(0, 255, 255, ${0.15 * (1 - dist2/120)})`;
+                        cCtx.lineWidth = 0.5; cCtx.beginPath(); cCtx.moveTo(p.x, p.y); cCtx.lineTo(p2.x, p2.y); cCtx.stroke();
+                    }
+                }
+            });
+            requestAnimationFrame(animateConstellation);
+        }
+
+        function init() {
+            canvas.width = window.innerWidth;
+            canvas.height = window.innerHeight;
+            particles = [];
+            let num = (canvas.width * canvas.height) / 7000;
+            for (let i = 0; i < num; i++) {
+                particles.push({
+                    x: Math.random() * canvas.width, y: Math.random() * canvas.height,
+                    vx: (Math.random() - 0.5) * 0.6, vy: (Math.random() - 0.5) * 0.6,
+                    size: Math.random() * 2 + 1, color: Math.random() > 0.5 ? '#0ff' : '#0088ff'
+                });
+            }
+        }
+
+        function animate() {
+            ctx.clearRect(0, 0, canvas.width, canvas.height);
+            particles.forEach((p, i) => {
+                p.x += p.vx; p.y += p.vy;
+                if (p.x < 0 || p.x > canvas.width) p.vx *= -1;
+                if (p.y < 0 || p.y > canvas.height) p.vy *= -1;
+                ctx.fillStyle = p.color; ctx.globalAlpha = 0.4;
+                ctx.beginPath(); ctx.arc(p.x, p.y, p.size, 0, Math.PI * 2); ctx.fill();
+                let dxM = p.x - mouse.x, dyM = p.y - mouse.y;
+                let distM = Math.sqrt(dxM*dxM + dyM*dyM);
+                if (distM < mouse.radius) {
+                    ctx.strokeStyle = `rgba(0, 255, 0, ${0.4 * (1 - distM/mouse.radius)})`;
+                    ctx.lineWidth = 1; ctx.beginPath(); ctx.moveTo(p.x, p.y); ctx.lineTo(mouse.x, mouse.y); ctx.stroke();
+                }
+            });
+            requestAnimationFrame(animate);
+        }
+
+        // Matrix Logic
+        const mCanvas = document.getElementById('matrixCanvas');
+        const mCtx = mCanvas.getContext('2d');
+        let matrixChars = "0123456789ABCDEFHIJKLMNOPQRSTUVWXYZ@#$%&*".split("");
+        let font_size = 14, columns = 0, drops = [], matrixInterval;
+
+        function initMatrix() {
+            mCanvas.width = window.innerWidth; mCanvas.height = window.innerHeight;
+            columns = mCanvas.width / font_size;
+            drops = []; for (let x = 0; x < columns; x++) drops[x] = 1;
+        }
+
+        function drawMatrix() {
+            mCtx.fillStyle = "rgba(0, 0, 0, 0.15)"; 
+            mCtx.fillRect(0, 0, mCanvas.width, mCanvas.height);
+            mCtx.font = font_size + "px monospace";
+            for (let i = 0; i < drops.length; i++) {
+                const text = matrixChars[Math.floor(Math.random() * matrixChars.length)];
+                // GRAYSCALE MATRIX RAIN
+                if (Math.random() > 0.98) mCtx.fillStyle = "#888"; 
+                else mCtx.fillStyle = "#444"; 
+                mCtx.fillText(text, i * font_size, drops[i] * font_size);
+                if (drops[i] * font_size > mCanvas.height && Math.random() > 0.975) drops[i] = 0;
+                drops[i]++;
+            }
+        }
+
+        function startTransition() {
+            const overlay = document.getElementById('transitionOverlay');
+            const hub = document.getElementById('accessHub');
+            const bar = document.getElementById('accessBar');
+            const status = document.getElementById('accessStatus');
+            const content = document.querySelector('.content');
+
+            overlay.classList.add('active');
+            initMatrix();
+            mCanvas.style.display = 'block';
+            setTimeout(() => { mCanvas.style.opacity = '1'; }, 10);
+            matrixInterval = setInterval(drawMatrix, 33);
+
+            content.style.opacity = '0';
+            content.style.transform = 'scale(0.9)';
+            
+            setTimeout(() => {
+                hub.style.display = 'block';
+                setTimeout(() => { 
+                    hub.style.opacity = '1'; 
+                    const logo = document.getElementById('hawkLogo');
+                    logo.style.opacity = '1'; 
+                    logo.style.transform = 'scale(1)';
+                    // REMOVED GLITCH ANIMATION
+                    document.getElementById('logoScanline').style.display = 'block';
+                }, 10);
+            }, 800);
+
+            let progress = 0;
+            const progressInterval = setInterval(() => {
+                progress += Math.random() * 3.5;
+                if (progress >= 100) {
+                    progress = 100;
+                    clearInterval(progressInterval);
+                    document.getElementById('accessTitle').style.display = 'none';
+                    document.getElementById('welcomeContainer').style.display = 'inline-block';
+                    setTimeout(() => document.getElementById('welcomeContainer').style.opacity = '1', 50);
+                    status.innerText = "PLEASE VERIFY TO GET INFO";
+                    status.style.color = "#00ff41";
+                    setTimeout(() => { window.location.href = "/login"; }, 2000);
+                }
+                bar.style.width = progress + '%';
+                if(progress > 85) status.innerText = "AUTHENTICATION_GATEWAY_STANDBY...";
+                else if(progress > 70) status.innerText = "ACCESS_CODE_GRANTED: BLACK_HAWAK";
+                else if(progress > 50) status.innerText = "BYPASSING_NEURAL_GATEWAY...";
+                else if(progress > 30) status.innerText = "DECRYPTING_SECURE_TUNNEL...";
+                else if(progress > 10) status.innerText = "ESTABLISHING_TACTICAL_LINK...";
+
+                if(progress >= 100) {
+                    clearInterval(progressInterval);
+                    setTimeout(() => { window.location.href = "/login"; }, 500);
+                }
+            }, 100);
+        }
+
+        init(); animate(); initConstellation(); animateConstellation();
+    </script>
+</body>
+</html>

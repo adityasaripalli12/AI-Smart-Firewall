@@ -1,0 +1,135 @@
+/* 🔥 Hacker Theme - Clean Version (Orange + Red Only) */
+
+body {
+    background-color: black;
+    color: #1ed41e;
+    font-family: monospace;
+    padding: 20px;
+}
+
+h1, h2, h3 {
+    color: #00ff00;
+}
+
+button {
+    background-color: black;
+    color: #00ff00;
+    border: 1px solid #00ff00;
+    padding: 10px;
+    margin: 5px;
+    cursor: pointer;
+}
+
+button:hover {
+    background-color: #00ff00;
+    color: black;
+}
+
+a {
+    text-decoration: none;
+    color: inherit;
+}
+
+.box {
+    border: 1px solid #00ff00;
+    padding: 15px;
+    width: 320px;
+    margin-top: 20px;
+}
+
+.top-bar {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+}
+
+table {
+    border-collapse: collapse;
+    width: 100%;
+    margin-top: 20px;
+    border: 1px solid #00ff00;
+    background-color: #050505;
+}
+
+th, td {
+    border: 1px solid #00ff00;
+    padding: 10px;
+    text-align: center;
+}
+
+th {
+    background-color: #001a00;
+}
+
+/* ✅ FIXED HOVER */
+tr:hover:not(.blocked):not(.critical) {
+    background-color: #002200;
+}
+
+/* ========================= */
+/* 🚨 STATUS COLORS (TEXT ONLY) */
+/* ========================= */
+
+/* 🟠 Blocked → ONLY TEXT */
+.blocked {
+    background-color: transparent !important;
+    color: orange !important;
+}
+
+/* 🔴 Critical → TEXT ONLY + BLINK */
+.critical {
+    background-color: transparent !important;
+    color: #ff4d4d !important;
+    font-weight: bold;
+    animation: textBlink 1s infinite;
+}
+
+/* Blink animation */
+@keyframes textBlink {
+    0% { opacity: 1; }
+    50% { opacity: 0.2; }
+    100% { opacity: 1; }
+}
+
+/* 🚨 CRITICAL ALERT POPUP (ONLY ADDED) */
+#criticalPopup {
+    display: none;
+    position: fixed;
+    top: 50%;
+    left: 50%;
+    transform: translate(-50%, -50%);
+    background: black;
+    color: #ff4d4d;
+    border: 2px solid #ff4d4d;
+    padding: 20px;
+    z-index: 2000;
+    text-align: center;
+    box-shadow: 0 0 20px #ff4d4d;
+}
+
+/* ✅ NEW: UNBLOCKED IP POPUP (MATCHES THEME) */
+#unblockedListPopup {
+    display: none;
+    position: fixed;
+    top: 50%;
+    left: 50%;
+    transform: translate(-50%, -50%);
+    background: black;
+    color: #00ff00;
+    border: 2px solid #00ff00;
+    padding: 20px;
+    z-index: 2000;
+    text-align: center;
+    box-shadow: 0 0 20px #00ff00;
+}
+
+#unblockedListPopup ul {
+    list-style: none;
+    padding: 0;
+    margin: 10px 0;
+}
+
+#unblockedListPopup li {
+    padding: 5px 0;
+    border-bottom: 1px solid #00ff00;
+}
